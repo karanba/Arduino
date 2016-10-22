@@ -5,9 +5,8 @@
 #include <RF24.h>
 #include <RF24_config.h>
 
-RF24 radio(9, 10);
+RF24 radio(7, 8);
 const uint64_t pipe = 0xE8E8F0F0E1LL;
-int msg[1];
 
 void setup() {
   Serial.begin(9600);
@@ -18,11 +17,11 @@ void setup() {
 
 void loop() {
   if (radio.available()) {
-
-    radio.read(msg, 1);
-    Serial.println(msg[0]);
-    delay(100);
-
+    unsigned int msg=8;
+    radio.read(&msg, sizeof(unsigned int));
+    Serial.println(msg);
+  } else {
+    Serial.println("radio not avalible");
   }
 
 }
