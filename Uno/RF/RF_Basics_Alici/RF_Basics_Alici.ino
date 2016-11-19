@@ -8,10 +8,10 @@ int msg[2];
 RF24 radio(9, 10);
 const uint64_t pipe = 0xE8E8F0F0E1LL;
 
-int MOTORA_PWM = 5;
-int MOTORA_DIR = 4;
-int MOTORB_PWM = 3;
-int MOTORB_DIR = 2;
+int M1A = 5;
+int M1B = 4;
+int M2A = 3;
+int M2B = 2;
 int xF = 0, xB = 0, yR = 0, yL = 0;
 /*
               A1  A2  B1  B2
@@ -26,57 +26,67 @@ void setup(void) {
   radio.begin();
   radio.openReadingPipe(1, pipe);
   radio.startListening();
-  pinMode(MOTORA_DIR, OUTPUT);
-  pinMode(MOTORB_DIR, OUTPUT);
-  pinMode(MOTORA_PWM, OUTPUT);
-  pinMode(MOTORB_PWM, OUTPUT);
+  pinMode(M1B, OUTPUT);
+  pinMode(M2B, OUTPUT);
+  pinMode(M1A, OUTPUT);
+  pinMode(M2A, OUTPUT);
 
-  digitalWrite(MOTORA_DIR, LOW);
-  digitalWrite(MOTORA_PWM, LOW);
-  digitalWrite(MOTORB_DIR, LOW);
-  digitalWrite(MOTORB_PWM, LOW);
+  digitalWrite(M1A, LOW);
+  digitalWrite(M1B, LOW);
+
+
+  digitalWrite(M2A, LOW);
+  digitalWrite(M2B, LOW);
 }
 
 void loop(void) {
 
   while (radio.available()) {
     radio.read(msg, sizeof(msg));
-    yL = constrain(map(msg[1], 0, 500, 128, 0), 0, 128);
+    yL = constrain(map (msg[1], 0, 500, 128, 0), 0, 128);
     yR = constrain(map(msg[1], 550, 1023, 0, 128), 0, 128);
     if (msg[0] > 550) { // ileri
       xF = constrain(map(msg[0], 550, 1023, 0, 255), 0, 255);
       xB = 0;
-      digitalWrite(MOTORA_DIR, LOW);
-      analogWrite(MOTORA_PWM, constrain(xF + yL, 0, 255));
+      digitalWrite(M1A, HIGH);
+      digitalWrite(M1B, LOW);
+     // analogWrite(M1A, constrain(xF + yL, 0, 255));
 
-      digitalWrite(MOTORB_DIR, LOW);
-      analogWrite(MOTORB_PWM, constrain(xF + yR, 0, 255));
+      digitalWrite(M2A, HIGH);
+      digitalWrite(M2B, LOW);
+     // analogWrite(M2A, constrain(xF + yR, 0, 255));
     } else if (msg[0] < 450) { // geri
       xB = constrain(map(msg[0], 490, 0, 0, 255), 0, 255);
       xF = 0;
+      digitalWrite(M1B, HIGH);
+      digitalWrite(M1A, LOW);
+     // analogWrite(M1A, constrain(xF + yL, 0, 255));
 
-      analogWrite(MOTORA_DIR, constrain(xB + yL, 0, 255));
-      digitalWrite(MOTORA_PWM, LOW);
+      digitalWrite(M2B, HIGH);
+      digitalWrite(M2A, LOW);
+     /* analogWrite(M1B, constrain(xB + yL, 0, 255));
+      digitalWrite(M1A, LOW);
 
-      analogWrite(MOTORB_DIR, constrain(xB + yR, 0, 255));
-      digitalWrite(MOTORB_PWM, LOW);
+      analogWrite(M2B, constrain(xB + yR, 0, 255));
+      digitalWrite(M2A, LOW);*/
     } else {
       if (yL > 50) {
-        digitalWrite(MOTORA_DIR, HIGH);
-        digitalWrite(MOTORA_PWM, LOW);
-        digitalWrite(MOTORB_DIR, LOW);
-        digitalWrite(MOTORB_PWM, HIGH);
+        digitalWrite(M1B, HIGH);
+        digitalWrite(M1A, LOW);
 
+        digitalWrite(M2A, HIGH);
+        digitalWrite(M2B, LOW);
       } else if (yR > 50) {
-        digitalWrite(MOTORA_DIR, LOW);
-        digitalWrite(MOTORA_PWM, HIGH);
-        digitalWrite(MOTORB_DIR, HIGH);
-        digitalWrite(MOTORB_PWM, LOW);
+        digitalWrite(M1B, LOW);
+        digitalWrite(M1A, HIGH);
+
+        digitalWrite(M2A, LOW);
+        digitalWrite(M2B, HIGH);
       } else {
-        digitalWrite(MOTORA_DIR, LOW);
-        digitalWrite(MOTORA_PWM, LOW);
-        digitalWrite(MOTORB_DIR, LOW);
-        digitalWrite(MOTORB_PWM, LOW);
+        digitalWrite(M1B, LOW);
+        digitalWrite(M1A, LOW);
+        digitalWrite(M2B, LOW);
+        digitalWrite(M2A, LOW);
       }
     }
 
@@ -95,6 +105,6 @@ void loop(void) {
     Serial.print(msg[0]);
 
 
-    delay(100);
+    delay(20);
   }
 }
